@@ -4,14 +4,15 @@ section .data
 	palabra_1:db 0x1b,"[10;10H","[-----]",0xa
 	tampal_1: equ $-palabra_1
 
-	borra: db 0x1b,"[10;10H]","borra",0x1b ,"[2J]",0xa
+	borra: db 0x1b,"[10;10H]","borra",0x1b ,"[2J",0xa
 	tamborra: equ $-borra
 
 	variable: db"",0xa
 	z: equ 122
 	c: equ 99
 	mascara: equ 255
-	mascara2: equ 63
+	nueve: equ 57
+	cero: equ 48
 
 section .text
 	global _start
@@ -46,15 +47,58 @@ _start:
 	mov rax,[variable]
 	and rax,mascara
 	cmp rax,c
-	je .bloque_4
+	je .bloque_pregunta
 	jne .bloque_5
+
+.bloque_pregunta:
+
+	mov r9,[palabra_1 + 6]
+	and r9,mascara
+	cmp r9,nueve
+	je .bloque_cambio
+	jne .bloque_4
+
+
+.bloque_cambio:
+
+	mov r9,[palabra_1 + 5]
+        and r9,mascara
+        add r9,1
+        mov [palabra_1 + 5],r9
+
+	mov rax,cero
+	and rax,mascara
+	mov [palabra_1 + 6],rax
+
+	mov rax,72
+        mov [palabra_1 + 7],rax
+
+        mov rax,91
+        mov [palabra_1 + 8],rax
+        mov rax,45
+        mov [palabra_1 + 9],rax
+        mov rax,45
+        mov [palabra_1 + 10],rax
+        mov rax,45
+        mov [palabra_1 + 11],rax
+        mov rax,45
+        mov [palabra_1 + 12],rax
+        mov rax,45
+        mov [palabra_1 + 13],rax
+        mov rax,93
+        mov [palabra_1 + 14],rax
+
+
+
+	jmp .bloque_1
+
 
 .bloque_4:
 
-	mov rax,[palabra_1 + 6]
-	and rax,mascara
-	add rax,1
-	mov [palabra_1 + 6],rax
+	mov r9,[palabra_1 + 6]
+	and r9,mascara
+	add r9,1
+	mov [palabra_1 + 6],r9
 	mov rax,72
 	mov [palabra_1 + 7],rax
 
@@ -81,16 +125,57 @@ _start:
 	mov rax,[variable]
         and rax,mascara
 	cmp rax,z
-	je .bloque_6
-	jmp .bloque_1 
+	je .bloque_pregunta2
+	jne .bloque_1
+
+.bloque_pregunta2:
+
+	mov r9,[palabra_1 + 6]
+        and r9,mascara
+        cmp r9,cero
+        je .bloque_cambio2
+        jne .bloque_6
+ 
+
+.bloque_cambio2:
+
+	mov rax,[palabra_1 + 5]
+	and rax,mascara
+	sub rax,1
+	mov [palabra_1 + 5],rax
+
+	mov r9,nueve
+	and r9,mascara
+	mov [palabra_1 + 6],r9
+
+      	mov rax,72
+        mov [palabra_1 + 7],rax
+
+        mov rax,91
+        mov [palabra_1 + 8],rax
+        mov rax,45
+        mov [palabra_1 + 9],rax
+        mov rax,45
+        mov [palabra_1 + 10],rax
+        mov rax,45
+        mov [palabra_1 + 11],rax
+        mov rax,45
+        mov [palabra_1 + 12],rax
+        mov rax,45
+        mov [palabra_1 + 13],rax
+        mov rax,93
+        mov [palabra_1 + 14],rax
+
+	jmp .bloque_1
+
 
 
 .bloque_6:
 
-	mov rax,[palabra_1 + 6]
-	and rax,mascara
-	sub rax,1
-        mov [palabra_1 + 6],rax
+	mov r9,[palabra_1 + 6]
+	and r9,mascara
+	sub r9,1
+        mov [palabra_1 + 6],r9
         mov rax,72
         mov [palabra_1 + 7],rax
 
