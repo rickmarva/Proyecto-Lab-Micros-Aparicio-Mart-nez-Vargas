@@ -1,3 +1,4 @@
+
 section .data
 
 
@@ -13,6 +14,8 @@ section .data
 	mascara: equ 255
 	nueve: equ 57
 	cero: equ 48
+	uno: equ 50
+	cuatro: equ 52
 
 section .text
 	global _start
@@ -47,8 +50,24 @@ _start:
 	mov rax,[variable]
 	and rax,mascara
 	cmp rax,c
-	je .bloque_pregunta
+	je .bloque_pregunta_limited
 	jne .bloque_5
+
+.bloque_pregunta_limited:
+
+	mov r9,[palabra_1 + 5]
+	and r9,mascara
+	cmp r9,cuatro
+	je .bloque_pregunta_limiteu
+	jne .bloque_pregunta
+
+.bloque_pregunta_limiteu:
+
+	mov r9,[palabra_1 + 6]
+	and r9,mascara
+	cmp r9,nueve
+	je .bloque_1
+	jne .bloque_pregunta
 
 .bloque_pregunta:
 
@@ -125,8 +144,25 @@ _start:
 	mov rax,[variable]
         and rax,mascara
 	cmp rax,z
-	je .bloque_pregunta2
+	je .bloque_pregunta_limited2
 	jne .bloque_1
+
+.bloque_pregunta_limited2:
+
+        mov r9,[palabra_1 + 5]
+        and r9,mascara
+        cmp r9,cero
+        je .bloque_pregunta_limiteu2
+        jne .bloque_pregunta2
+
+.bloque_pregunta_limiteu2:
+
+        mov r9,[palabra_1 + 6]
+        and r9,mascara
+        cmp r9,uno
+        je .bloque_1
+        jne .bloque_pregunta2
+
 
 .bloque_pregunta2:
 
