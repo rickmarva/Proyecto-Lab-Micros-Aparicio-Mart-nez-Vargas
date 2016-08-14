@@ -33,7 +33,7 @@ section .data
 	entro1:db 0x1b,"[10;10H","decenas",0xa
         tamentro1:equ $-entro
 
-        bola_1:db 0x1b,"[15;43H","@",0xa
+        bola_1:db 0x1b,"[15;01H","@",0xa
         tambola_1: equ $-bola_1
 
         borra: db 0x1b,"[10;10H","borra",0x1b ,"[2J",0xa
@@ -142,8 +142,6 @@ _start:
         syscall
 
 
-
-
         imprime borra,tamborra,bola_1,tambola_1
 
         mov rax,[bola_1 + 3]
@@ -163,7 +161,6 @@ _start:
         cmp rax,57               ;compara si el registro es igual a 9
         je .bloque_4.2.2         ;si es igual incrementa  decenas, y pone en 9 unidades
         jne .bloque_4.2.1        ;si no es igual simplemente incrementa  unidades
-
 
 
 .bloque_4.2.1:
@@ -189,7 +186,6 @@ _start:
         syscall
 
 
-
         imprime borra,tamborra,bola_1,tambola_1
 
 	mov rax,[bola_1 + 3]
@@ -208,7 +204,7 @@ _start:
         inc rax
         mov rbx,[bola_1 + 3]
         and rbx,mascara
-        inc rbx
+        dec rbx;------------------------------cambie el inc por un dec-------------------------------------------------------------
         mov [bola_1 + 3 ],rbx
         mov r8,59
         mov [bola_1 + 4],r8
@@ -226,9 +222,9 @@ _start:
 
         mov rax,[bola_1 + 3]
         and rax,mascara
-        cmp rax,57
-        je .bloque_a  ;desplaza derecha  abajo
-        jne .bloque_b; desplaza derecha arriba
+        cmp rax,48
+        je .bloque_b  ;desplaza derecha  abajo
+        jne .bloque_a; desplaza derecha arriba
 
         ;jmp .bloque_3
 
@@ -238,10 +234,17 @@ _start:
 
         mov rax,[bola_1 + 5]
         and rax,mascara
-        cmp rax,48; si es igual a 
-        je .bloque_3
+        cmp rax,48; si es igual a 0 
+        je .bloque_5.5
         jne .bloque_6
 
+.bloque_5.5:
+
+	mov rax,[bola_1 + 6]
+	and rax,mascara
+	cmp rax,49	;comparo si llego a la posicion 1
+	je .bloque_3
+	jne .bloque_6
 .bloque_6:
 
 	mov rax,[subebaja+1]
