@@ -44,6 +44,10 @@ section .data
 	esquina: db 0x1b,"[1;1H",""
 	esquina_tamano: equ $-esquina
 
+	;Variable para borrar texto
+	borrar_txt: db 0x1b,"[12;15H","                         "
+	borrar_txt_tamano: equ $-borrar_txt
+
 	;Variables que van a sustituir los bloque cuando estos sean impactados
 
 	posicion_a: db 0x1b,"[2;2H","                "
@@ -94,8 +98,116 @@ section .data
 	g: equ 103
 	h: equ 104
 	i: equ 105
+	x: equ 120
 
 	mascara: equ 255
+
+	termios:        times 36 db 0                                                                   ;Estructura de 36bytes que contiene el modo de operacion de la$
+        stdin:                    equ 0                                                                                         ;Standard Input (se usa stdin en lugar$
+        ICANON:      equ 1<<1                                                                                   ;ICANON: Valor de control para encender/apagar el modo$
+        ECHO:           equ 1<<3                                                                                        ;ECHO: Valor de control para encender/apagar e$
+
+	canonical_off:
+
+        ;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
+        ;TERMIOS son los parametros de configuracion que usa Linux para STDIN
+        call read_stdin_termios
+
+        ;Se escribe el nuevo valor de ICANON en EAX, para apagar el modo canonico
+        push rax
+        mov eax, ICANON
+        not eax
+        and [termios+12], eax
+        pop rax
+
+        ;Se escribe la nueva configuracion de TERMIOS
+        call write_stdin_termios
+        ret
+        ;Final de la funcion
+
+	echo_off:
+
+        ;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
+        ;TERMIOS son los parametros de configuracion que usa Linux para STDIN
+        call read_stdin_termios
+
+        ;Se escribe el nuevo valor de ECHO en EAX para apagar el echo
+        push rax
+        mov eax, ECHO
+        not eax
+        and [termios+12], eax
+        pop rax
+
+        ;Se escribe la nueva configuracion de TERMIOS
+        call write_stdin_termios
+        ret
+        ;Final de la funcion
+
+	canonical_on:
+
+        ;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
+        ;TERMIOS son los parametros de configuracion que usa Linux para STDIN
+        call read_stdin_termios
+
+        ;Se escribe el nuevo valor de modo Canonico
+        or dword [termios+12], ICANON
+
+        ;Se escribe la nueva configuracion de TERMIOS
+        call write_stdin_termios
+        ret
+        ;Final de la funcion
+
+	echo_on:
+
+        ;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
+        ;TERMIOS son los parametros de configuracion que usa Linux para STDIN
+        call read_stdin_termios
+
+        ;Se escribe el nuevo valor de modo echo
+        or dword [termios+12], ECHO
+
+        ;Se escribe la nueva configuracion de TERMIOS
+        call write_stdin_termios
+        ret
+        ;Final de la funcion
+
+	read_stdin_termios:
+        push rax
+        push rbx
+        push rcx
+        push rdx
+
+        mov eax, 36h
+        mov ebx, stdin
+        mov ecx, 5401h
+        mov edx, termios
+        int 80h
+
+        pop rdx
+        pop rcx
+        pop rbx
+        pop rax
+        ret
+        ;Final de la funcion
+
+	write_stdin_termios:
+        push rax
+        push rbx
+        push rcx
+        push rdx
+
+        mov eax, 36h
+        mov ebx, stdin
+        mov ecx, 5402h
+        mov edx, termios
+        int 80h
+
+        pop rdx
+        pop rcx
+        pop rbx
+        pop rax
+        ret
+        ;Final de la funcion
 
 section .text
 	global _start
@@ -308,24 +420,62 @@ _start:
 	;Compara
 
 	cmp r8,r9
-	je .final
+	je .bloque_19
 	jne .bloque_17
+
+.bloque_19:
+	;Desactiva modo canonico y echo, ademas de adquirir letra
+
+	call canonical_off
+	call echo_off
+	mov rax,1
+        mov rdi,1
+        mov rsi,siguiente
+        mov rdx,siguiente_tamano
+	syscall
+	mov rax,0
+	mov rdi,0
+	mov rsi,letra
+	mov rdx,1
+	syscall
+
+.bloque_20:
+	;Compara letra
+
+        mov rax,[letra]
+        and rax,mascara
+        cmp rax,x
+        je .final
+        jne .bloque_19
 
 .final:
 	;Sigueinte linea
 	mov rax,1
 	mov rdi,1
-	mov rsi,siguiente
-	mov rdx,siguiente_tamano
+	mov rsi,borrar_txt
+	mov rdx,borrar_txt_tamano
 	syscall
+
+	call canonical_on
+	call echo_on
 
 ;Segunda Etiqueta
 
 _segunda:
 
 	mov r8,num1
+	;Ajustar cursor
+        mov rax,1
+        mov rdi,1
+        mov rsi,ajustar
+        mov rdx,ajustar_tamano
+        syscall
+
+        call canonical_off
+        call echo_off
 
 .primero:
+
 	;Recepcion de letra
 
 	mov rax,0
@@ -527,6 +677,8 @@ _segunda:
 	jne .primero
 
 .seg_final:
+	call canonical_on
+	call echo_on
 	mov rax,60
 	mov rdi,0
 	syscall
