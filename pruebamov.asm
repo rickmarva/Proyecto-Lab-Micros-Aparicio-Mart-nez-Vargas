@@ -2,11 +2,11 @@
 section .data
 
 
-	palabra_1:db 0x1b,"[10;10H","[-----]",0xa
+	palabra_1:db 0x1b,"[10;10H","-------",0x1b,"[10;1H";barra del juego
 	tampal_1: equ $-palabra_1
 
-	borra: db 0x1b,"[10;10H]","borra",0x1b ,"[2J",0xa
-	tamborra: equ $-borra
+	borra: db 0x1b,"[10;1H","                                                ",0xa ;variable de limpieza de la pantalla al mover la barra
+	tamb: equ $-borra
 
 	variable: db"",0xa
 	z: equ 122
@@ -24,13 +24,13 @@ _start:
 
 .bloque_1:
 
-	mov rax,1
+	mov rax,1   ;imprime los espacios  para borrar la barra
 	mov rdi,1
 	mov rsi,borra
-	mov rdx,tamborra
+	mov rdx,tamb
 	syscall
 
-	mov rax,1
+	mov rax,1 ;imprime la barra
 	mov rdi,1
 	mov rsi,palabra_1
 	mov rdx,tampal_1
@@ -38,7 +38,7 @@ _start:
 
 .bloque_2:
 
-	mov rax,0
+	mov rax,0 ;captura la letra presionada
 	mov rdi,0
 	mov rsi,variable
 	mov rdx,1
@@ -47,15 +47,17 @@ _start:
 
 .bloque_3:
 
-	mov rax,[variable]
+	mov rax,[variable] ;compara la letra presionada con c
 	and rax,mascara
 	cmp rax,c
 	je .bloque_pregunta_limited
 	jne .bloque_5
 
+
 .bloque_pregunta_limited:
 
-	mov r9,[palabra_1 + 5]
+
+	mov r9,[palabra_1 + 5] ;bloque que analiza el limite derecho de la pantalla en las decenas para no exceder la barra, osea 4
 	and r9,mascara
 	cmp r9,cuatro
 	je .bloque_pregunta_limiteu
@@ -63,15 +65,15 @@ _start:
 
 .bloque_pregunta_limiteu:
 
-	mov r9,[palabra_1 + 6]
+	mov r9,[palabra_1 + 6];bloque que analiza el limite derecho de la pantalla en las unidades para no exceder la barra, osea 9
 	and r9,mascara
 	cmp r9,nueve
-	je .bloque_1
+	je .bloque_1 ;si esta en el limite pinta la barra en la misma posición porque no se va a mover
 	jne .bloque_pregunta
 
 .bloque_pregunta:
 
-	mov r9,[palabra_1 + 6]
+	mov r9,[palabra_1 + 6] ;analiza si la posición de la barra se encuentra en 9 en las unidades, para intercambiarlo por 0
 	and r9,mascara
 	cmp r9,nueve
 	je .bloque_cambio
@@ -80,19 +82,20 @@ _start:
 
 .bloque_cambio:
 
-	mov r9,[palabra_1 + 5]
-        and r9,mascara
-        add r9,1
-        mov [palabra_1 + 5],r9
+	mov rax,[palabra_1 + 5] ;intercambia la posicion de la barra de 9 en las unidades por 0 para iniciar una nueva cuenta
+        and rax,mascara
+        add rax,1
+        mov [palabra_1 + 5],rax
 
-	mov rax,cero
-	and rax,mascara
-	mov [palabra_1 + 6],rax
 
-	mov rax,72
+	mov r9,cero
+	and r9,mascara
+	mov [palabra_1 + 6],r9
+
+	mov rax,72 ;imprime el resto de la barra
         mov [palabra_1 + 7],rax
 
-        mov rax,91
+        mov rax,45
         mov [palabra_1 + 8],rax
         mov rax,45
         mov [palabra_1 + 9],rax
@@ -104,7 +107,7 @@ _start:
         mov [palabra_1 + 12],rax
         mov rax,45
         mov [palabra_1 + 13],rax
-        mov rax,93
+        mov rax,45
         mov [palabra_1 + 14],rax
 
 
@@ -114,14 +117,15 @@ _start:
 
 .bloque_4:
 
-	mov r9,[palabra_1 + 6]
+	mov r9,[palabra_1 + 6] ;sino se presentó ninguno de los bloques anteriores, suma 1 a las unidades en la posicion de la barra para moverla
 	and r9,mascara
 	add r9,1
 	mov [palabra_1 + 6],r9
+
 	mov rax,72
 	mov [palabra_1 + 7],rax
 
-	mov rax,91
+	mov rax,45
 	mov [palabra_1 + 8],rax
         mov rax,45
         mov [palabra_1 + 9],rax
@@ -133,13 +137,13 @@ _start:
         mov [palabra_1 + 12],rax
         mov rax,45
         mov [palabra_1 + 13],rax
-        mov rax,93
+        mov rax,45
         mov [palabra_1 + 14],rax
 
 
 	jmp .bloque_1
 
-.bloque_5:
+.bloque_5: ;compara la letra presionada con z
 
 	mov rax,[variable]
         and rax,mascara
@@ -147,7 +151,7 @@ _start:
 	je .bloque_pregunta_limited2
 	jne .bloque_1
 
-.bloque_pregunta_limited2:
+.bloque_pregunta_limited2: ;compara decenas de la posición de la barra para el limite izquierdo de la pantalla
 
         mov r9,[palabra_1 + 5]
         and r9,mascara
@@ -155,7 +159,7 @@ _start:
         je .bloque_pregunta_limiteu2
         jne .bloque_pregunta2
 
-.bloque_pregunta_limiteu2:
+.bloque_pregunta_limiteu2: ;compara unidades de la posición de la barra para el limite izquierdo de la pantalla
 
         mov r9,[palabra_1 + 6]
         and r9,mascara
@@ -164,7 +168,7 @@ _start:
         jne .bloque_pregunta2
 
 
-.bloque_pregunta2:
+.bloque_pregunta2: ;analiza si las unidades se encuentran en 0 ya que al restar posición se debe volver 9
 
 	mov r9,[palabra_1 + 6]
         and r9,mascara
@@ -173,7 +177,7 @@ _start:
         jne .bloque_6
  
 
-.bloque_cambio2:
+.bloque_cambio2: ;intercambia 0 por 9 en las unidades y le resta 1 a las decenas para continuar la cuenta
 
 	mov rax,[palabra_1 + 5]
 	and rax,mascara
@@ -187,7 +191,7 @@ _start:
       	mov rax,72
         mov [palabra_1 + 7],rax
 
-        mov rax,91
+        mov rax,45
         mov [palabra_1 + 8],rax
         mov rax,45
         mov [palabra_1 + 9],rax
@@ -199,14 +203,14 @@ _start:
         mov [palabra_1 + 12],rax
         mov rax,45
         mov [palabra_1 + 13],rax
-        mov rax,93
+        mov rax,45
         mov [palabra_1 + 14],rax
 
 	jmp .bloque_1
 
 
 
-.bloque_6:
+.bloque_6: ;le resta 1 a las unidades de la posición de la barra para moverla
 
 	mov r9,[palabra_1 + 6]
 	and r9,mascara
@@ -215,7 +219,7 @@ _start:
         mov rax,72
         mov [palabra_1 + 7],rax
 
-	mov rax,91
+	mov rax,45
         mov [palabra_1 + 8],rax
         mov rax,45
         mov [palabra_1 + 9],rax
@@ -227,7 +231,7 @@ _start:
         mov [palabra_1 + 12],rax
         mov rax,45
         mov [palabra_1 + 13],rax
-        mov rax,93
+        mov rax,45
         mov [palabra_1 + 14],rax
 
 
