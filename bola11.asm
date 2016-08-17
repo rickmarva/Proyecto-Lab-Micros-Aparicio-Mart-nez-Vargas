@@ -21,18 +21,18 @@
 %endmacro
 
 ;Para el Macro imprime
-;%1 borra
+;%1 borra1
 ;%2 tamborra
 ;%3 bola_1
 ;%4 tambola_1
 
 section .data
 
-        bola_1:db 0x1b,"[11;40H","@",0xa			;Aqui se asigna la posiciòn inicial de la bola
+        bola_1:db 0x1b,"[11;40H","@",0x1b,"[11;1H"			;Aqui se asigna la posiciòn inicial de la bola
         tambola_1: equ $-bola_1					;se define el tamaño del dato que se va a imprimir en imprime
 
-        borra: db 0x1b,"[10;10H","borra",0x1b ,"[2J",0xa	;IMprime la palabra "borra" y luego borra la pantalla
-        tamborra: equ $-borra					;se define el tamaño
+        borra1: db 0x1b,"[11;40H"," ",0x1b,"[11;1H"			;Imprime un espacio donde se desea borrar la bola
+        tamborra: equ $-borra1					;se define el tamaño
 
 	variable: db "",0xa
         mascara: equ 255					;mascara de 8 bits para poder realizar las comparaciones
@@ -45,7 +45,43 @@ section .text
 _start:
 
 .bloque_izqder:
+;---------------------------------------------
+	mov rax,[bola_1 + 2]
+	and rax,mascara
+	mov [borra1 + 2],rax
 
+	mov rax,[bola_1 + 3]
+        and rax,mascara
+        mov [borra1 + 3],rax
+
+	mov rax,[bola_1 + 4]
+        and rax,mascara
+        mov [borra1 + 4],rax
+
+	mov rax,[bola_1 + 5]
+        and rax,mascara
+        mov [borra1 + 5],rax
+
+	mov rax,[bola_1 + 6]
+        and rax,mascara
+        mov [borra1 + 6],rax
+
+	mov rax,72
+        and rax,mascara
+        mov [borra1 + 7],rax
+
+	mov rax,32
+	and rax,mascara
+        mov [borra1 + 8],rax
+	syscall
+
+	mov rax,1
+	mov rdi,1
+	mov rsi,borra1
+	mov rdx,tamborra
+	syscall
+
+;----------------------------------------------esto y el [2J
 	mov rax,[izqder+1]
 	and rax,mascara
 	cmp rax,49
@@ -124,7 +160,7 @@ _start:
 	mov rbx,[bola_1 + 3]	;guarda en el registro el valor de las unidades vertical
 	and rbx,mascara		;elimina los bits basura del registro
 	inc rbx			;incrementa en una posición las unidades del desplazamiento vertical
-	
+
 	;reconstruyo lo almacenado en bola_1 con los desplazamientos
 	mov [bola_1 + 2],r10	;asigna el viejo valor de las decenas del desplazamiento vertical
 	mov [bola_1 + 3],rbx	;asigna el nuevo valor de las unidades del desplazamiento vertical
@@ -139,7 +175,7 @@ _start:
         mov [bola_1 + 8],rax	;agrego a bola_1 el caracter "@"
         syscall			;llamado al sistema
 
-	imprime borra,tamborra,bola_1,tambola_1	;imprimo la bola en al pantalla
+	imprime borra1,tamborra,bola_1,tambola_1	;imprimo la bola en al pantalla
 
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
@@ -176,7 +212,7 @@ _start:
         mov [bola_1 + 8],rax	;se agrega a la posiciòn 8 de bola_1  el  "@"
         syscall
 
-        imprime borra,tamborra,bola_1,tambola_1		;se imprime en pantalla la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;se imprime en pantalla la bola
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del desplazamiento vertical
@@ -223,7 +259,7 @@ _start:
         syscall			;llamado al sistema
 
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -259,7 +295,7 @@ _start:
         syscall
 
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
         mov rax,[bola_1 + 2]	;mueve las decenas del eje vertical al registro
@@ -316,7 +352,7 @@ _start:
         syscall			;llamado al sistema
 
 
-        imprime borra,tamborra,bola_1,tambola_1
+        imprime borra1,tamborra,bola_1,tambola_1
 ;----------------------------------------------------------------------------revisa si llego a la posicion 01 vertical
 	mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
         and rax,mascara		;elimina bits basura
@@ -361,7 +397,7 @@ _start:
 	syscall
 
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
 ;----------------------------------------------------------------------------compara si llego a la posicion 01 vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas eje vertical
         and rax,mascara		;elimina bits basura
@@ -414,7 +450,7 @@ _start:
         mov [bola_1 + 8],rax	;agrega el "@"
         syscall
 
-        imprime borra,tamborra,bola_1,tambola_1	;imprime en pantalla la bola
+        imprime borra1,tamborra,bola_1,tambola_1	;imprime en pantalla la bola
 
 ;----------------------------------------------------------------------------compara si llego a la posicion 01 vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje verticla 
@@ -459,7 +495,7 @@ _start:
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
 
 ;---------------------------------------------------------------------comprueba si se llego a la posicion 01 eje vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -586,7 +622,7 @@ _start:
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall			;llamado al sistema
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime en pantalla la bola
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
 	mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -622,7 +658,7 @@ _start:
         mov rax,64
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola en la pantalla
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola en la pantalla
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -666,7 +702,7 @@ _start:
         mov rax,64
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -703,7 +739,7 @@ _start:
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall			;llamado al sistema
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola
 
 ;-------------------------------------------------------------------------- aqui comparo si llego a 30 el limite vertical
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -761,7 +797,7 @@ _start:
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall			;llamado al sistema
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola ne la pantalla
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola ne la pantalla
 
 ;-------------------------------------------------------------------------compara si el eje vertical llego al limite 01
 	mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -806,7 +842,7 @@ _start:
         mov rax,64
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall
-        imprime borra,tamborra,bola_1,tambola_1
+        imprime borra1,tamborra,bola_1,tambola_1
 
 ;-----------------------------------------------------------------------comparamos si el eje vertical llego al limite 01
         mov rax,[bola_1 + 2]	;mueve  al registro las decenas eje vertical
@@ -859,7 +895,7 @@ _start:
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall			;llamada al sistema
 
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola en la pantalla
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola en la pantalla
 
 ;-----------------------------------------------------------------------compara si se llego al limite vertical 01
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
@@ -904,7 +940,7 @@ _start:
 	mov rax,64
         mov [bola_1 + 8],rax	;agregamos el "@"
         syscall
-        imprime borra,tamborra,bola_1,tambola_1		;imprime la bola en pantalla
+        imprime borra1,tamborra,bola_1,tambola_1		;imprime la bola en pantalla
 
 ;-------------------------------------------------------------------comapramos si el eje vetical llego al limite 01
         mov rax,[bola_1 + 2]	;mueve al registro las decenas del eje vertical
